@@ -11,10 +11,11 @@ from binance_f.base.printobject import *
 
 class RestApiRequestImpl(object):
 
-    def __init__(self, api_key, secret_key, server_url="https://fapi.binance.com"):
+    def __init__(self, api_key, secret_key, server_url="https://fapi.binance.com", print_response=False):
         self.__api_key = api_key
         self.__secret_key = secret_key
         self.__server_url = server_url
+        self.__print_response = print_response
 
     def __create_request_by_get(self, url, builder):
         request = RestApiRequest()
@@ -31,11 +32,12 @@ class RestApiRequestImpl(object):
         request.header.update({'Content-Type': 'application/json'})
         request.header.update({"X-MBX-APIKEY": self.__api_key})
         request.url = url + "?" + builder.build_url()
-         # For develop
-        print("====== Request ======")
-        print(request)
-        PrintMix.print_data(request)
-        print("=====================")
+        # For develop
+        self.__print_response:
+            print("====== Request ======")
+            print(request)
+            PrintMix.print_data(request)
+            print("=====================")
         return request
 
     def __create_request_by_post_with_signature(self, url, builder):
@@ -50,10 +52,11 @@ class RestApiRequestImpl(object):
         request.post_body = builder.post_map
         request.url = url + "?" + builder.build_url()
         # For develop
-        print("====== Request ======")
-        print(request)
-        PrintMix.print_data(request)
-        print("=====================")
+        self.__print_response:
+            print("====== Request ======")
+            print(request)
+            PrintMix.print_data(request)
+            print("=====================")
         return request
 
     def __create_request_by_delete_with_signature(self, url, builder):
@@ -67,10 +70,11 @@ class RestApiRequestImpl(object):
         request.header.update({"X-MBX-APIKEY": self.__api_key})
         request.url = url + "?" + builder.build_url()
         # For develop
-        print("====== Request ======")
-        print(request)
-        PrintMix.print_data(request)
-        print("=====================")
+        self.__print_response:
+            print("====== Request ======")
+            print(request)
+            PrintMix.print_data(request)
+            print("=====================")
         return request
 
     def __create_request_by_get_with_signature(self, url, builder):
@@ -84,10 +88,11 @@ class RestApiRequestImpl(object):
         request.header.update({"X-MBX-APIKEY": self.__api_key})
         request.url = url + "?" + builder.build_url()
         # For develop
-        print("====== Request ======")
-        print(request)
-        PrintMix.print_data(request)
-        print("=====================")
+        self.__print_response:
+            print("====== Request ======")
+            print(request)
+            PrintMix.print_data(request)
+            print("=====================")
         return request
 
     def __create_request_by_put_with_signature(self, url, builder):
@@ -101,10 +106,11 @@ class RestApiRequestImpl(object):
         request.header.update({"X-MBX-APIKEY": self.__api_key})
         request.url = url + "?" + builder.build_url()
         # For develop
-        print("====== Request ======")
-        print(request)
-        PrintMix.print_data(request)
-        print("=====================")
+        self.__print_response:
+            print("====== Request ======")
+            print(request)
+            PrintMix.print_data(request)
+            print("=====================")
         return request
         
     def get_servertime(self):
@@ -229,20 +235,14 @@ class RestApiRequestImpl(object):
         return request
 
     def get_mark_price(self, symbol):
+        check_should_not_none(symbol, "symbol")
         builder = UrlParamsBuilder()
         builder.put_url("symbol", symbol)
 
         request = self.__create_request_by_get("/fapi/v1/premiumIndex", builder)
 
         def parse(json_wrapper):
-            result = list()
-            if symbol:
-                result = MarkPrice.json_parse(json_wrapper)
-            else:
-                data_list = json_wrapper.convert_2_array()
-                for item in data_list.get_items():
-                    element = MarkPrice.json_parse(item)
-                    result.append(element)
+            result = MarkPrice.json_parse(json_wrapper)
             return result
 
         request.json_parser = parse
@@ -948,10 +948,15 @@ class RestApiRequestImpl(object):
 
         def parse(json_wrapper):
             result = list()
-            data_list = json_wrapper.convert_2_array()
-            for item in data_list.get_items():
-                element = LeverageBracket.json_parse(item)
+
+            if symbol:
+                element = LeverageBracket.json_parse(json_wrapper)
                 result.append(element)
+            else:
+                data_list = json_wrapper.convert_2_array()
+                for item in data_list.get_items():
+                    element = LeverageBracket.json_parse(item)
+                    result.append(element)
 
             return result
 
